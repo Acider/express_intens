@@ -8,7 +8,7 @@ window.addEventListener('DOMContentLoaded', function () {
         confirm = document.querySelector('.confirm'),
         badge = document.querySelector('.nav__badge'),
         totalCost = document.querySelector('.cart__total > span'),
-        titles = document.querySelector('.goods__title');
+        titles = document.querySelectorAll('.goods__title');
 
     function cartOpen() {
         cart.style.display = 'block';
@@ -32,6 +32,9 @@ window.addEventListener('DOMContentLoaded', function () {
                 empty = cartWrapper.querySelector('.empty');
             trigger.remove();
 
+            showConfirm();
+            calcGoods(1);
+
             removeBtn.classList.add('goods__item-remove');
             removeBtn.innerHTML = '&times';
 
@@ -40,9 +43,77 @@ window.addEventListener('DOMContentLoaded', function () {
             cartWrapper.appendChild(item);
 
             if (empty) {
-                empty.remove();
+                empty.style.display = 'none';
             }
+            calcTotal();
+            removeFromCart();
         });
     });
+
+    function sliceTitles() {
+        titles.forEach(function (item) {
+            if (item.textContent.length < 70) {
+                return;
+            } else {
+                const str = item.textContent.slice(0, 71) + '...';
+                item.textContent = str;
+            }
+        })
+    }
+
+    sliceTitles();
+
+    function showConfirm() {
+        confirm.style.display = 'block';
+        let counter = 100;
+        const id = setInterval(frame, 10);
+
+        function frame() {
+            if (counter === 10) {
+                clearInterval(id);
+                confirm.style.display = 'none';
+            } else {
+                counter--;
+                confirm.style.transform = `translateY(-${counter}px)`;
+                confirm.style.opacity = '.' + counter;
+            }
+
+        }
+    }
+
+    function calcGoods(i) {
+        const items = cartWrapper.querySelectorAll('.goods__item');
+        badge.textContent = items.length + i;
+    }
+
+    function calcTotal() {
+        const prices = document.querySelectorAll('.cart__wrapper > .goods__item > .goods__price > span');
+        let total = 0;
+        prices.forEach(function (item) {
+            total += +item.textContent;
+        });
+        totalCost.textContent = String(total);
+    }
+
+    function removeFromCart() {
+        const removeBnt = cartWrapper.querySelectorAll('.goods__item-remove');
+
+        removeBnt.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                btn.parentElement.remove();
+                calcGoods(0);
+                calcTotal();
+                checkEmptyCart();
+            });
+        });
+    }
+
+    function checkEmptyCart() {
+        let counter = cartWrapper.querySelectorAll('.goods__item').length;
+        if (counter === 0) {
+            let empty = cartWrapper.querySelector('.empty');
+            empty.style.display = '';
+        }
+    }
 });
 
